@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ManhwaTracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+  <style>
+    /* === CSS Variables — AI asistido: paleta de colores === */
+    :root {
+      --bg: #0d0d0d;
+      --surface: #1a1a1a;
+      --surface2: #222222;
+      --surface3: #2a2a2a;
+      --red: #e63946;
+      --red-dark: #7a0000;
+      --red-dim: #2a0a0a;
+      --text: #f0f0f0;
+      --text-muted: #777777;
+      --border: #2a2a2a;
+      --fab-size: 56px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+      padding-bottom: 88px;
+    }
+
+    /* ============ HEADER ============ */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      letter-spacing: 2px;
+      color: var(--red);
+      line-height: 1;
+    }
+
+    .header h1 span { color: var(--text); }
+
+    .search-wrapper { display: flex; align-items: center; gap: 4px; }
+
+    .search-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px;
+      transition: color 0.2s;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-btn:hover { color: var(--red); }
+
+    .search-input-wrap {
+      max-width: 0;
+      overflow: hidden;
+      transition: max-width 0.3s ease;
+    }
+
+    .search-input-wrap.open { max-width: 200px; }
+
+    .search-input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      width: 180px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus { border-color: var(--red); }
+
+    /* ============ TABS ============ */
+    .tabs {
+      display: flex;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      position: sticky;
+      top: 57px;
+      z-index: 99;
+    }
+
+    .tabs::-webkit-scrollbar { display: none; }
+
+    .tab {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 12px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .tab.active { color: var(--red); border-bottom-color: var(--red); }
+
+    /* ============ COUNTERS ============ */
+    .counters {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .counters::-webkit-scrollbar { display: none; }
+
+    .counter-pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .counter-pill span { color: var(--red); font-weight: 600; }
+
+    /* ============ CARDS ============ */
+    .card-list {
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      transition: border-color 0.2s;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card:hover { border-color: var(--red-dark); }
+
+    .card-cover {
+      width: 80px;
+      min-height: 110px;
+      object-fit: cover;
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .cover-placeholder {
+      width: 80px;
+      min-height: 110px;
+      background: var(--red-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .card-body {
+      flex: 1;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 1px;
+      line-height: 1.1;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 155px;
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 2px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+    }
+
+    .delete-btn:hover { color: var(--red); }
+
+    .card-genre {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .status-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      width: fit-content;
+    }
+
+    .badge-leyendo   { background: #1a3a1a; color: #4caf50; }
+    .badge-pendiente { background: #1a1a3a; color: #5c9bd6; }
+    .badge-completado{ background: #2a1a00; color: #ff9800; }
+
+    .card-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .chapter-control {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 8px;
+    }
+
+    .chapter-label { font-size: 11px; color: var(--text-muted); }
+
+    .chapter-input {
+      background: none;
+      border: none;
+      color: var(--red);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      width: 48px;
+      outline: none;
+      text-align: center;
+    }
+
+    .status-select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      padding: 4px 8px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .status-select:focus { border-color: var(--red); }
+
+    /* ============ EMPTY STATE ============ */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state p { margin-top: 12px; font-size: 14px; }
+
+    /* ============ FAB ============ */
+    .fab {
+      position: fixed;
+      bottom: 24px;
+      right: calc(50% - 240px + 24px);
+      width: var(--fab-size);
+      height: var(--fab-size);
+      border-radius: 50%;
+      background: var(--red);
+      border: none;
+      color: white;
+      font-size: 30px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(230, 57, 70, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.25s, background 0.2s;
+      z-index: 200;
+    }
+
+    @media (max-width: 480px) {
+      .fab { right: 24px; }
+    }
+
+    .fab:hover { transform: scale(1.1); background: #c1121f; }
+    .fab.open  { transform: rotate(45deg); background: #c1121f; }
+
+    /* ============ OVERLAY ============ */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 300;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .overlay.show { opacity: 1; pointer-events: all; }
+
+    /* ============ BOTTOM SHEET ============ */
+    .bottom-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(110%);
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      border-top: 1px solid var(--border);
+      z-index: 400;
+      padding: 0 20px 36px;
+      transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+      max-height: 92vh;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .bottom-sheet.show { transform: translateX(-50%) translateY(0); }
+
+    .sheet-handle {
+      width: 40px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 12px auto 20px;
+    }
+
+    .sheet-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 1.5px;
+      color: var(--red);
+      margin-bottom: 20px;
+    }
+
+    /* ============ FORM ============ */
+    .form-group { margin-bottom: 16px; }
+
+    .form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .form-input:focus, .form-select:focus { border-color: var(--red); }
+
+    .form-input.error  { border-color: var(--red); background: var(--red-dim); }
+    .form-select option{ background: #1a1a1a; }
+
+    .form-error {
+      font-size: 11px;
+      color: var(--red);
+      margin-top: 4px;
+      display: none;
+    }
+
+    .form-error.show { display: block; }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--red);
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      letter-spacing: 0.5px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-submit:hover  { background: #c1121f; }
+    .btn-submit:active { transform: scale(0.98); }
+
+    /* ============ TOAST ============ */
+    .toast {
+      position: fixed;
+      bottom: 92px;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--surface);
+      border: 1px solid var(--red-dark);
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 13px;
+      color: var(--text);
+      z-index: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-top">
+      <h1>MANHWA<span>TRACKER</span></h1>
+      <div class="search-wrapper">
+        <button class="search-btn" id="searchToggle" aria-label="Buscar">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+        </button>
+        <div class="search-input-wrap" id="searchWrap">
+          <input type="text" class="search-input" id="searchInput" placeholder="Buscar título..." autocomplete="off">
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Tabs -->
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-filter="todos">Todos</button>
+    <button class="tab" data-filter="Leyendo">Leyendo</button>
+    <button class="tab" data-filter="Pendiente">Pendiente</button>
+    <button class="tab" data-filter="Completado">Completado</button>
+  </nav>
+
+  <!-- Counters -->
+  <div class="counters" id="counters"></div>
+
+  <!-- Card list -->
+  <main class="card-list" id="cardList"></main>
+
+  <!-- FAB -->
+  <button class="fab" id="fab" aria-label="Agregar manhwa">+</button>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Bottom Sheet -->
+  <div class="bottom-sheet" id="bottomSheet" role="dialog" aria-modal="true" aria-label="Agregar Manhwa">
+    <div class="sheet-handle"></div>
+    <h2 class="sheet-title">AGREGAR MANHWA</h2>
+
+    <div class="form-group">
+      <label class="form-label" for="inputTitle">Título</label>
+      <input type="text" class="form-input" id="inputTitle" placeholder="Ej: Solo Leveling" maxlength="100" autocomplete="off">
+      <span class="form-error" id="errorTitle">El título es obligatorio (máx. 100 caracteres).</span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="inputGenre">Género</label>
+      <select class="form-select" id="inputGenre">
+        <option value="Acción">Acción</option>
+        <option value="Romance">Romance</option>
+        <option value="Fantasía">Fantasía</option>
+        <option value="Terror">Terror</option>
+        <option value="Drama">Drama</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="inputChapter">Capítulo actual</label>
+      <input type="number" class="form-input" id="inputChapter" placeholder="0" min="0" value="0">
+      <span class="form-error" id="errorChapter">Ingresa un número entero mayor o igual a 0.</span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="inputStatus">Estado</label>
+      <select class="form-select" id="inputStatus">
+        <option value="Leyendo">Leyendo</option>
+        <option value="Pendiente">Pendiente</option>
+        <option value="Completado">Completado</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="inputCover">URL de portada (opcional)</label>
+      <input type="text" class="form-input" id="inputCover" placeholder="https://..." maxlength="500" autocomplete="off">
+      <span class="form-error" id="errorCover">Ingresa una URL válida (https://...).</span>
+    </div>
+
+    <button class="btn-submit" id="btnSubmit">AGREGAR</button>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // ============================================================
+    // STATE
+    // ============================================================
+    const state = {
+      items: [],      // Arreglo principal de objetos manhwa
+      filter: 'todos',
+      search: '',
+    };
+
+    // ============================================================
+    // STORAGE — AI asistido: estructura modular de persistencia
+    // ============================================================
+    const STORAGE_KEY = 'manhwatracker_v1';
+
+    function saveToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items));
+      } catch (e) {
+        console.error('Error al guardar:', e);
+      }
+    }
+
+    function loadFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        state.items = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(state.items)) state.items = [];
+      } catch {
+        state.items = [];
+      }
+    }
+
+    // ============================================================
+    // SECURITY — AI asistido: sanitización para prevenir XSS
+    // ============================================================
+    function sanitizeInput(str) {
+      return String(str)
+        .trim()
+        .replace(/[<>"'`&]/g, c => ({
+          '<': '&lt;', '>': '&gt;', '"': '&quot;',
+          "'": '&#39;', '`': '&#96;', '&': '&amp;'
+        }[c]));
+    }
+
+    // AI asistido: expresión regular para validar URLs (https)
+    const URL_REGEX = /^https?:\/\/[^\s]{3,}$/i;
+    function isValidUrl(url) {
+      if (!url || url.trim() === '') return true; // Opcional
+      return URL_REGEX.test(url.trim());
+    }
+
+    // AI asistido: expresión regular para validar título no vacío
+    const TITLE_REGEX = /^.{1,100}$/;
+    function isValidTitle(title) {
+      return TITLE_REGEX.test(title.trim());
+    }
+
+    function isValidChapter(val) {
+      const n = Number(val);
+      return Number.isInteger(n) && n >= 0;
+    }
+
+    const ALLOWED_STATUSES = ['Leyendo', 'Pendiente', 'Completado'];
+    const ALLOWED_GENRES   = ['Acción', 'Romance', 'Fantasía', 'Terror', 'Drama'];
+
+    function isAllowedStatus(val) { return ALLOWED_STATUSES.includes(val); }
+    function isAllowedGenre(val)  { return ALLOWED_GENRES.includes(val); }
+
+    // ============================================================
+    // VALIDATION
+    // ============================================================
+    function validateForm() {
+      let valid = true;
+
+      const title   = document.getElementById('inputTitle').value;
+      const chapter = document.getElementById('inputChapter').value;
+      const cover   = document.getElementById('inputCover').value;
+
+      const setError = (inputId, errorId, show) => {
+        document.getElementById(inputId).classList.toggle('error', show);
+        document.getElementById(errorId).classList.toggle('show', show);
+        if (show) valid = false;
+      };
+
+      setError('inputTitle',   'errorTitle',   !isValidTitle(title));
+      setError('inputChapter', 'errorChapter', !isValidChapter(chapter));
+      setError('inputCover',   'errorCover',   cover.trim() !== '' && !isValidUrl(cover));
+
+      return valid;
+    }
+
+    // ============================================================
+    // CRUD — Funciones reutilizables de gestión de datos
+    // ============================================================
+    function generateId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    }
+
+    function addItem() {
+      if (!validateForm()) return;
+
+      const genre  = document.getElementById('inputGenre').value;
+      const status = document.getElementById('inputStatus').value;
+
+      // Validar que género y estado sean valores permitidos (seguridad)
+      if (!isAllowedGenre(genre) || !isAllowedStatus(status)) return;
+
+      const item = {
+        id:      generateId(),
+        title:   sanitizeInput(document.getElementById('inputTitle').value),
+        genre:   genre,
+        chapter: parseInt(document.getElementById('inputChapter').value, 10) || 0,
+        status:  status,
+        cover:   document.getElementById('inputCover').value.trim(),
+      };
+
+      state.items.unshift(item);
+      saveToStorage();
+      renderList();
+      renderCounters();
+      closeSheet();
+      resetForm();
+      showToast('Manhwa agregado ✓');
+    }
+
+    function deleteItem(id) {
+      state.items = state.items.filter(i => i.id !== id);
+      saveToStorage();
+      renderList();
+      renderCounters();
+      showToast('Eliminado');
+    }
+
+    function updateChapter(id, value) {
+      if (!isValidChapter(value)) return;
+      const item = state.items.find(i => i.id === id);
+      if (item) {
+        item.chapter = parseInt(value, 10);
+        saveToStorage();
+      }
+    }
+
+    function updateStatus(id, value) {
+      if (!isAllowedStatus(value)) return;
+      const item = state.items.find(i => i.id === id);
+      if (item) {
+        item.status = value;
+        saveToStorage();
+        renderCounters();
+        renderList();
+      }
+    }
+
+    // ============================================================
+    // FILTER + SEARCH — AI asistido: lógica de filtrado combinado
+    // ============================================================
+    function filterByStatus(items) {
+      if (state.filter === 'todos') return items;
+      return items.filter(i => i.status === state.filter);
+    }
+
+    function searchByTitle(items) {
+      if (!state.search.trim()) return items;
+      const term = state.search.trim().toLowerCase();
+      return items.filter(i => i.title.toLowerCase().includes(term));
+    }
+
+    function getFilteredItems() {
+      return searchByTitle(filterByStatus(state.items));
+    }
+
+    // ============================================================
+    // RENDER — AI asistido: uso de createElement para evitar XSS
+    // ============================================================
+    function createPlaceholder() {
+      const ph = document.createElement('div');
+      ph.className = 'cover-placeholder';
+      // SVG estático, no contiene datos del usuario
+      ph.innerHTML = `<svg width="26" height="26" fill="none" stroke="#e63946" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.4">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <path d="M3 9h18M9 21V9"/>
+      </svg>`;
+      return ph;
+    }
+
+    function createBadgeElement(status) {
+      const badge = document.createElement('span');
+      badge.className = 'status-badge';
+      const classMap = {
+        'Leyendo':    'badge-leyendo',
+        'Pendiente':  'badge-pendiente',
+        'Completado': 'badge-completado',
+      };
+      badge.classList.add(classMap[status] || 'badge-pendiente');
+      badge.textContent = status; // textContent seguro
+      return badge;
+    }
+
+    function createCardElement(item) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.id = item.id;
+
+      // Cover — validar URL antes de usarla como src
+      if (item.cover && isValidUrl(item.cover)) {
+        const img = document.createElement('img');
+        img.className = 'card-cover';
+        img.src = item.cover;    // URL validada con regex
+        img.alt = '';            // Decorativo
+        img.loading = 'lazy';
+        img.onerror = () => img.replaceWith(createPlaceholder());
+        card.appendChild(img);
+      } else {
+        card.appendChild(createPlaceholder());
+      }
+
+      // Body
+      const body = document.createElement('div');
+      body.className = 'card-body';
+
+      // Header row (título + botón eliminar)
+      const header = document.createElement('div');
+      header.className = 'card-header';
+
+      const title = document.createElement('div');
+      title.className = 'card-title';
+      title.textContent = item.title; // textContent — no innerHTML con datos usuario
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'delete-btn';
+      delBtn.setAttribute('aria-label', 'Eliminar');
+      // SVG estático, seguro
+      delBtn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
+      </svg>`;
+      delBtn.addEventListener('click', () => deleteItem(item.id));
+
+      header.appendChild(title);
+      header.appendChild(delBtn);
+
+      // Género
+      const genre = document.createElement('div');
+      genre.className = 'card-genre';
+      genre.textContent = item.genre; // textContent seguro
+
+      // Badge de estado
+      const badge = createBadgeElement(item.status);
+
+      // Controles inline
+      const controls = document.createElement('div');
+      controls.className = 'card-controls';
+
+      // Control de capítulo
+      const chapterWrap = document.createElement('div');
+      chapterWrap.className = 'chapter-control';
+
+      const chLabel = document.createElement('span');
+      chLabel.className = 'chapter-label';
+      chLabel.textContent = 'Cap.';
+
+      const chInput = document.createElement('input');
+      chInput.type = 'number';
+      chInput.className = 'chapter-input';
+      chInput.value = item.chapter;
+      chInput.min = '0';
+      chInput.setAttribute('aria-label', 'Capítulo');
+      chInput.addEventListener('change', e => updateChapter(item.id, e.target.value));
+
+      chapterWrap.appendChild(chLabel);
+      chapterWrap.appendChild(chInput);
+
+      // Select de estado inline
+      const statusSel = document.createElement('select');
+      statusSel.className = 'status-select';
+      statusSel.setAttribute('aria-label', 'Estado');
+
+      ALLOWED_STATUSES.forEach(opt => {
+        const o = document.createElement('option');
+        o.value = opt;
+        o.textContent = opt; // textContent seguro
+        if (opt === item.status) o.selected = true;
+        statusSel.appendChild(o);
+      });
+
+      statusSel.addEventListener('change', e => updateStatus(item.id, e.target.value));
+
+      controls.appendChild(chapterWrap);
+      controls.appendChild(statusSel);
+
+      body.appendChild(header);
+      body.appendChild(genre);
+      body.appendChild(badge);
+      body.appendChild(controls);
+      card.appendChild(body);
+      return card;
+    }
+
+    function renderList() {
+      const container = document.getElementById('cardList');
+      // Limpiar con removeChild, no innerHTML
+      while (container.firstChild) container.removeChild(container.firstChild);
+
+      const filtered = getFilteredItems();
+
+      if (filtered.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        // SVG estático
+        empty.innerHTML = `<svg width="48" height="48" fill="none" stroke="#333" stroke-width="1.5" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M3 9h18M9 21V9"/>
+        </svg>`;
+        const p = document.createElement('p');
+        p.textContent = state.items.length === 0
+          ? 'Sin manhwas. Agrega uno con el botón +'
+          : 'Sin resultados para este filtro.';
+        empty.appendChild(p);
+        container.appendChild(empty);
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+      filtered.forEach(item => fragment.appendChild(createCardElement(item)));
+      container.appendChild(fragment);
+    }
+
+    function renderCounters() {
+      const container = document.getElementById('counters');
+      while (container.firstChild) container.removeChild(container.firstChild);
+
+      const counts = {
+        Total:      state.items.length,
+        Leyendo:    state.items.filter(i => i.status === 'Leyendo').length,
+        Pendiente:  state.items.filter(i => i.status === 'Pendiente').length,
+        Completado: state.items.filter(i => i.status === 'Completado').length,
+      };
+
+      const fragment = document.createDocumentFragment();
+      Object.entries(counts).forEach(([label, value]) => {
+        const pill = document.createElement('div');
+        pill.className = 'counter-pill';
+
+        const text = document.createTextNode(label + ': ');
+        const num  = document.createElement('span');
+        num.textContent = value;
+
+        pill.appendChild(text);
+        pill.appendChild(num);
+        fragment.appendChild(pill);
+      });
+
+      container.appendChild(fragment);
+    }
+
+    // ============================================================
+    // MODAL / BOTTOM SHEET
+    // ============================================================
+    function openSheet() {
+      document.getElementById('bottomSheet').classList.add('show');
+      document.getElementById('overlay').classList.add('show');
+      document.getElementById('fab').classList.add('open');
+      setTimeout(() => document.getElementById('inputTitle').focus(), 350);
+    }
+
+    function closeSheet() {
+      document.getElementById('bottomSheet').classList.remove('show');
+      document.getElementById('overlay').classList.remove('show');
+      document.getElementById('fab').classList.remove('open');
+    }
+
+    function resetForm() {
+      document.getElementById('inputTitle').value   = '';
+      document.getElementById('inputChapter').value = '0';
+      document.getElementById('inputCover').value   = '';
+      document.getElementById('inputStatus').value  = 'Leyendo';
+      document.getElementById('inputGenre').value   = 'Acción';
+      ['inputTitle', 'inputChapter', 'inputCover'].forEach(id =>
+        document.getElementById(id).classList.remove('error')
+      );
+      ['errorTitle', 'errorChapter', 'errorCover'].forEach(id =>
+        document.getElementById(id).classList.remove('show')
+      );
+    }
+
+    // ============================================================
+    // TOAST
+    // ============================================================
+    let toastTimer = null;
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg; // textContent seguro
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    // ============================================================
+    // EVENT LISTENERS
+    // ============================================================
+
+    // FAB toggle
+    document.getElementById('fab').addEventListener('click', () => {
+      document.getElementById('bottomSheet').classList.contains('show')
+        ? closeSheet()
+        : openSheet();
+    });
+
+    // Overlay → cerrar sheet
+    document.getElementById('overlay').addEventListener('click', closeSheet);
+
+    // Tabs de filtro
+    document.getElementById('tabs').addEventListener('click', e => {
+      const btn = e.target.closest('.tab');
+      if (!btn) return;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      state.filter = btn.dataset.filter;
+      renderList();
+    });
+
+    // Toggle búsqueda
+    document.getElementById('searchToggle').addEventListener('click', () => {
+      const wrap  = document.getElementById('searchWrap');
+      const input = document.getElementById('searchInput');
+      wrap.classList.toggle('open');
+      if (wrap.classList.contains('open')) {
+        input.focus();
+      } else {
+        input.value = '';
+        state.search = '';
+        renderList();
+      }
+    });
+
+    // Búsqueda en tiempo real
+    document.getElementById('searchInput').addEventListener('input', e => {
+      state.search = e.target.value;
+      renderList();
+    });
+
+    // Submit
+    document.getElementById('btnSubmit').addEventListener('click', addItem);
+
+    // Enter en campo título
+    document.getElementById('inputTitle').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addItem();
+    });
+
+    // Escape cierra sheet
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeSheet();
+    });
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    function init() {
+      loadFromStorage();
+      renderCounters();
+      renderList();
+    }
+
+    init();
+  </script>
+</body>
+</html>
