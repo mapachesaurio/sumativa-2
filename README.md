@@ -1,8 +1,8 @@
 # sumativa-2
 links de imagenes para probar:
 
-https://i.ibb.co/mCtzYmyG/bad-born-blood.jpg
-https://i.ibb.co/QjvHW79G/descarga.jpg
+https://i.ibb.co/mCtzYmyG/bad-born-blood.jpg / 
+https://i.ibb.co/QjvHW79G/descarga.jpg /
 https://i.ibb.co/Xfb4MTKV/mago-pastor.webp
 
 prompt usado:
